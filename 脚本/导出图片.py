@@ -22,7 +22,9 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-WS = os.path.dirname(HERE)
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+from 工作区路径 import WS, 数据根目录   # noqa: E402  考试目录在 <工作区>/数据/ 下
 
 CHROME_CANDIDATES = [
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
@@ -119,7 +121,7 @@ def png_size(path):
 
 def collect(target):
     """把参数解析成待转换的 html 列表。"""
-    p = target if os.path.isabs(target) else os.path.join(WS, target)
+    p = target if os.path.isabs(target) else os.path.join(数据根目录(), target)
     if not os.path.exists(p):
         p2 = os.path.join(os.getcwd(), target)
         if os.path.exists(p2):

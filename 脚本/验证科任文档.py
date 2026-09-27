@@ -25,7 +25,9 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-WS = os.path.dirname(HERE)
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+from 工作区路径 import WS, 数据根目录   # noqa: E402  考试目录在 <工作区>/数据/ 下
 CHROME_CANDIDATES = [
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
@@ -380,7 +382,8 @@ def check_one(browser, path):
 
 
 def main():
-    d = sys.argv[1] if len(sys.argv) > 1 else os.path.join(WS, "九年级9月考", "科任老师文档")
+    d = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
+        数据根目录(), "九年级9月考", "科任老师文档")
     if not os.path.isdir(d):
         cand = os.path.join(os.getcwd(), d)
         if os.path.isdir(cand):

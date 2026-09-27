@@ -18,7 +18,9 @@ from collections import Counter, OrderedDict, defaultdict
 from html import escape as html_escape
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-WS = os.path.dirname(HERE)                       # 成绩分析工作区/
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+from 工作区路径 import WS, 数据根目录, resolve_exam_dir   # noqa: E402  路径约定统一在那边
 TEMPLATE = os.path.join(HERE, "页面模板.html")
 
 # ==================== 默认分析配置 ====================
@@ -113,15 +115,8 @@ def make_ramp(n, anchors):
 
 
 # ---------------------------------------------------------------- 读取与推导
-def resolve_exam_dir(arg):
-    cand = arg if os.path.isabs(arg) else os.path.join(WS, arg)
-    if not os.path.isdir(cand):
-        cand2 = os.path.join(os.getcwd(), arg)
-        if os.path.isdir(cand2):
-            cand = cand2
-        else:
-            raise SystemExit(f"找不到考试目录：{arg}\n  已尝试：{cand}")
-    return os.path.abspath(cand)
+# resolve_exam_dir 已移到 工作区路径.py（数据在 <工作区>/数据/ 下），
+# 在文件开头 import 进来；import 本模块的脚本照旧用 G.resolve_exam_dir 即可。
 
 
 def num(x):

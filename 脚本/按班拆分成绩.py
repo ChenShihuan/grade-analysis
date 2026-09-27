@@ -22,6 +22,11 @@ from collections import OrderedDict
 
 from openpyxl import load_workbook
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+from 工作区路径 import resolve_exam_dir   # noqa: E402  考试目录在 <工作区>/数据/ 下
+
 # ==================== 默认配置 ====================
 # 与「表结构」相关；行号列号均从 1 开始数，和 Excel 里看到的一致
 DEFAULT_CONFIG = {
@@ -43,18 +48,7 @@ EXPECTED_CLASSES = ["01", "02", "03", "04", "05", "06",
 ANALYSIS_KEYS = {"重点班级", "等级顺序", "排名基准科目"}
 
 
-def resolve_exam_dir(arg):
-    """把命令行参数解析成考试目录的绝对路径。"""
-    here = os.path.dirname(os.path.abspath(__file__))
-    ws = os.path.dirname(here)                      # 成绩分析工作区/
-    cand = arg if os.path.isabs(arg) else os.path.join(ws, arg)
-    if not os.path.isdir(cand):
-        cand2 = os.path.join(os.getcwd(), arg)
-        if os.path.isdir(cand2):
-            cand = cand2
-        else:
-            raise SystemExit(f"找不到考试目录：{arg}\n  已尝试：{cand}")
-    return os.path.abspath(cand)
+# resolve_exam_dir 已移到 工作区路径.py（数据在 <工作区>/数据/ 下），在文件开头 import 进来。
 
 
 def read_config(path):
