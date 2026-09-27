@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__EXAM__</title>
+<style>
+  :root {
+    --page: #f9f9f7;
+    --surface-1: #fcfcfb;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --gridline: #e1e0d9;
+    --baseline: #c3c2b7;
+    --border: rgba(11, 11, 11, 0.10);
+    --wash: rgba(11, 11, 11, 0.04);
+    --s1: #2a78d6;
+    --baseline-series: #898781;
+    --band: rgba(11, 11, 11, 0.045);      /* 等级分带的交替底色 */
+    --band-edge: rgba(11, 11, 11, 0.14);  /* 等级分界竖线 */
+    --mark: #d64545;                       /* 目标生强调色 */
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* 版式按「宽版长图」定：定宽 1360，便于后续整页截图 / 打印 */
+  .wrap { max-width: 1360px; margin: 0 auto; padding: 30px 24px 56px; }
+
+  h1 { font-size: 25px; font-weight: 650; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-size: 17px; font-weight: 620; margin: 0 0 4px; }
+  h3 { font-size: 13.5px; font-weight: 600; margin: 0 0 2px; }
+  .sub { color: var(--text-secondary); margin: 0 0 4px; }
+  .muted { color: var(--text-muted); font-size: 12.5px; }
+
+  header.page-head { margin-bottom: 22px; }
+  .head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .exam-tag {
+    display: inline-block; margin-right: 10px; padding: 1px 10px 2px;
+    border: 1px solid var(--border); border-radius: 7px;
+    background: var(--wash); color: var(--text-secondary);
+    font-size: 18px; font-weight: 600; vertical-align: 2px;
+  }
+  .callout {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 13px 15px; margin: 16px 0 30px;
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .callout b { color: var(--text-primary); font-weight: 620; }
+  .callout ul { margin: 8px 0 0; padding-left: 18px; }
+  .callout li { margin: 3px 0; }
+
+  section { margin-bottom: 42px; }
+  .sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+  .sec-desc { color: var(--text-secondary); font-size: 13px; margin: 2px 0 0; }
+  .sec-num {
+    display: inline-block; min-width: 22px; height: 22px; line-height: 22px; text-align: center;
+    border-radius: 6px; background: var(--wash); border: 1px solid var(--border);
+    font-size: 12.5px; color: var(--text-secondary); margin-right: 8px; vertical-align: 1px;
+  }
+
+  .chart-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px 12px; }
+  .chart-host { position: relative; width: 100%; }
+  .chart-host svg { display: block; width: 100%; }
+  .axis-note {
+    font-size: 12.5px; color: var(--text-secondary);
+    margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+  }
+  .axis-note p { margin: 0 0 6px; line-height: 1.7; }
+  .axis-note p:last-child { margin-bottom: 0; }
+  .axis-note p.caveat { color: var(--text-muted); font-size: 11.5px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; }
+  .legend .item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-secondary); }
+  .legend .key { width: 16px; height: 3px; border-radius: 2px; flex: none; }
+  .callout.warn {
+    border-left: 3px solid #fab219; border-radius: 8px; padding: 9px 13px;
+    margin: 0 0 13px; font-size: 12.5px;
+  }
+  .callout.warn[hidden] { display: none; }
+
+  /* ---------- 考试情况总结 ---------- */
+  .summary-card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-left: 3px solid var(--mark);
+    border-radius: 10px; padding: 13px 16px 12px; margin-bottom: 14px;
+  }
+  .summary-card h3 { margin-bottom: 4px; }
+  .summary-card p { margin: 0; font-size: 13.5px; line-height: 1.75; color: var(--text-secondary); }
+  .summary-card[hidden] { display: none; }
+
+  /* ---------- 等级构成表 ---------- */
+  .comp-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 12px; margin-top: 14px; }
+  table.comp { border-collapse: separate; border-spacing: 2px; font-size: 12px; width: 100%; }
+  table.comp th { font-weight: 500; color: var(--text-muted); font-size: 11.5px; padding: 3px 4px; text-align: center; font-variant-numeric: tabular-nums; }
+  table.comp th.rowh { text-align: right; padding-right: 10px; color: var(--text-secondary); font-size: 12.5px; white-space: nowrap; }
+  table.comp th.grp { color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+  /* 科目列：跨整块，右侧画一条竖线把「该科」与「总分」两块分开 */
+  table.comp th.block {
+    text-align: center; vertical-align: middle; padding: 0 12px 0 2px;
+    border-right: 1px solid var(--border); color: var(--text-primary); font-weight: 620; font-size: 12.5px;
+  }
+  table.comp td {
+    text-align: center; border-radius: 4px; padding: 5px 2px;
+    font-variant-numeric: tabular-nums; cursor: default;
+  }
+  table.comp td:hover { outline: 2px solid var(--text-primary); outline-offset: -2px; }
+  table.comp td.zero { color: var(--text-muted); }
+  table.comp .swatch-cell { display: inline-flex; align-items: center; gap: 6px; }
+  table.comp .swatch-cell i { width: 11px; height: 11px; border-radius: 3px; display: block; flex: none; }
+
+  /* ---------- 数据表 ---------- */
+  .table-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table.data { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: 9px 14px; text-align: right; white-space: nowrap; }
+  table.data thead th {
+    background: var(--surface-1); border-bottom: 1px solid var(--baseline);
+    color: var(--text-secondary); font-weight: 600; font-size: 12.5px;
+  }
+  /* 列头可点，点一次按该列升序、再点反向 */
+  table.data thead th { cursor: pointer; user-select: none; }
+  table.data thead th:hover { color: var(--text-primary); background: var(--wash); }
+  table.data thead th:focus-visible { outline: 2px solid var(--s1); outline-offset: -2px; }
+  table.data thead th .arrow { color: var(--mark); font-size: 10px; }
+  table.data tbody tr + tr td { border-top: 1px solid var(--gridline); }
+  table.data tbody tr:hover td { background: var(--wash); }
+  /* 拔尖组：年级总排名靠前的那批，浅琥珀底 + 左侧色条。
+     用琥珀而不是班级色/等级色阶里的颜色，避免被误读成数据系列。 */
+  table.data tbody tr.elite td { background: rgba(237, 161, 0, .10); }
+  table.data tbody tr.elite:hover td { background: rgba(237, 161, 0, .18); }
+  table.data tbody tr.elite td.rowh { box-shadow: inset 3px 0 0 #eda100; }
+  .elite-legend {
+    display: flex; align-items: center; gap: 9px; margin: 0;
+    padding: 11px 14px; font-size: 12.5px; color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+  .elite-legend i {
+    width: 15px; height: 15px; border-radius: 3px; flex: none;
+    background: rgba(237, 161, 0, .10); box-shadow: inset 3px 0 0 #eda100;
+  }
+  table.data th.rowh, table.data td.rowh { text-align: left; font-weight: 600; }
+  table.data td.big { font-weight: 660; color: var(--mark); }
+  .empty { padding: 22px 16px; color: var(--text-secondary); font-size: 13.5px; }
+
+  /* ---------- 提示框 ---------- */
+  #tip {
+    position: fixed; pointer-events: none; z-index: 100; opacity: 0;
+    transition: opacity .1s ease;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 9px;
+    padding: 9px 11px; font-size: 12.5px; line-height: 1.5;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.16);
+    max-width: 300px;
+  }
+  #tip.on { opacity: 1; }
+  #tip .t-title { font-weight: 620; margin-bottom: 5px; font-size: 12.5px; }
+  #tip .t-row { display: flex; align-items: center; gap: 8px; }
+  #tip .t-row .k { width: 14px; height: 3px; border-radius: 2px; flex: none; }
+  #tip .t-row .v { font-weight: 660; font-variant-numeric: tabular-nums; margin-left: auto; }
+  #tip .t-row .sub { color: var(--text-muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  #tip .t-row .n { color: var(--text-secondary); }
+  #tip .t-note { color: var(--text-muted); font-size: 11.5px; margin-top: 5px; }
+
+  footer { border-top: 1px solid var(--border); padding-top: 18px; color: var(--text-muted); font-size: 12.5px; }
+  footer p { margin: 4px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <div class="head-row">
+      <div>
+        <h1><span class="exam-tag" id="head-tag"></span><span id="head-title"></span></h1>
+        <p class="sub" id="head-sub"></p>
+        <p class="muted" id="head-src"></p>
+      </div>
+    </div>
+  </header>
+
+  <div class="callout" id="method"></div>
+
+  <section>
+    <div class="sec-head">
+      <div>
+        <h2><span class="sec-num">一</span><span id="curr-h"></span></h2>
+        <p class="sec-desc">该科在各班之间的分数分布与等级构成对比</p>
+      </div>
+    </div>
+    <div class="summary-card" id="curr-summary"></div>
+    <div class="chart-card">
+      <div class="callout warn" id="curr-warn" hidden></div>
+      <div class="chart-host" id="curr-host"></div>
+      <div class="legend" id="curr-legend"></div>
+      <div class="axis-note" id="curr-note"></div>
+    </div>
+    <div class="comp-card">
+      <h3>等级构成（人数，格内颜色为该档色阶）</h3>
+      <p class="muted" id="curr-comp-note"></p>
+      <div id="curr-comp"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div>
+        <h2><span class="sec-num">二</span>本班该科目标生</h2>
+        <p class="sec-desc" id="tgt-desc"></p>
+      </div>
+    </div>
+    <div class="table-card" id="tgt-card"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div>
+        <h2><span class="sec-num">三</span><span id="prev-h"></span></h2>
+        <p class="sec-desc">该科在各班之间的分数分布与等级构成对比</p>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="callout warn" id="prev-warn" hidden></div>
+      <div class="chart-host" id="prev-host"></div>
+      <div class="legend" id="prev-legend"></div>
+      <div class="axis-note" id="prev-note"></div>
+    </div>
+    <div class="comp-card">
+      <h3>等级构成（人数，格内颜色为该档色阶）</h3>
+      <p class="muted" id="prev-comp-note"></p>
+      <div id="prev-comp"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p id="foot-rule"></p>
+    <p id="foot-meta"></p>
+  </footer>
+</div>
+
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const SUBJ = DATA.subject;
+
+const tip = document.getElementById("tip");
+const SQRT2PI = Math.sqrt(2 * Math.PI);
+
+/* ==================== 通用小工具 ==================== */
+function moments(vals) {
+  const n = vals.length;
+  if (!n) return null;
+  const mean = vals.reduce((a, b) => a + b, 0) / n;
+  const sd = Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / n);
+  const sorted = vals.slice().sort((a, b) => a - b);
+  const median = n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+  return { n, mean, sd, median, min: sorted[0], max: sorted[n - 1] };
+}
+
+/** 高斯核密度估计；带宽取 Silverman 规则，不低于 floor（避免整数分造成毛刺） */
+function kdeCurve(vals, xs, floor, cap) {
+  const m = moments(vals);
+  if (!m || m.sd === 0) return xs.map(() => 0);
+  const h = Math.min(Math.max(1.06 * m.sd * Math.pow(m.n, -0.2), floor), cap || Infinity);
+  return xs.map(x => {
+    let s = 0;
+    for (const v of vals) s += Math.exp(-0.5 * ((x - v) / h) ** 2);
+    return s / (vals.length * h * SQRT2PI);
+  });
+}
+
+/** 把一个跨度取整到好看的刻度值（1/2/5 × 10^n） */
+function niceStep(max) {
+  const raw = max / 4;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const n = raw / mag;
+  const m = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+  return m * mag;
+}
+
+/** 众数占比：某一分数并列的人数比例，用于提示平滑曲线是否可靠 */
+function modalShare(vals) {
+  const c = new Map();
+  let best = 0;
+  for (const v of vals) {
+    const k = c.get(v) || 0;
+    c.set(v, k + 1);
+    if (k + 1 > best) best = k + 1;
+  }
+  return vals.length ? best / vals.length : 0;
+}
+
+/** 填色之上的文字：按该填色的实际亮度取白字或墨字 */
+function inkOn(hex) {
+  const lin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+  const L = 0.2126 * lin(parseInt(hex.slice(1, 3), 16))
+          + 0.7152 * lin(parseInt(hex.slice(3, 5), 16))
+          + 0.0722 * lin(parseInt(hex.slice(5, 7), 16));
+  return L > 0.42 ? "#0b0b0b" : "#ffffff";
+}
+
+function showTip(ev, build) {
+  tip.replaceChildren();
+  build(tip);
+  tip.classList.add("on");
+  moveTip(ev);
+}
+function moveTip(ev) {
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
+  tip.style.left = Math.max(8, x) + "px";
+  tip.style.top = Math.max(8, y) + "px";
+}
+function hideTip() { tip.classList.remove("on"); }
+document.addEventListener("scroll", hideTip, { passive: true });
+
+function tipRow(label, value, color, square, sub) {
+  const r = document.createElement("div");
+  r.className = "t-row";
+  const k = document.createElement("i");
+  k.className = "k" + (square ? " sq" : "");
+  if (color) k.style.background = color;
+  else k.style.display = "none";
+  const n = document.createElement("span");
+  n.className = "n";
+  n.textContent = label;
+  const v = document.createElement("span");
+  v.className = "v";
+  v.textContent = value;
+  r.append(k, n, v);
+  if (sub) {
+    const s = document.createElement("span");
+    s.className = "sub";
+    s.textContent = sub;
+    r.append(s);
+  }
+  return r;
+}
+function tipTitle(text) {
+  const d = document.createElement("div");
+  d.className = "t-title";
+  d.textContent = text;
+  return d;
+}
+function tipNote(text) {
+  const d = document.createElement("div");
+  d.className = "t-note";
+  d.textContent = text;
+  return d;
+}
+const fmtB = v => Number(v.toFixed(2));
+
+/* ==================== 单科分数分布曲线 ==================== */
+/* 与主报告第 2 节同一套算法：KDE 画分数分布，等级分带画在曲线背后。
+   横轴反向（高分在左），使 A 档落在左侧，与等级构成表的列顺序一致。 */
+function drawDistribution(ids, ex) {
+  const host = document.getElementById(ids.host);
+  const warn = document.getElementById(ids.warn);
+  host.replaceChildren();
+
+  const LEVELS = ex.levels;
+  const FOCUS = ex.focus;
+  const FEATURED = ex.featured;         // 本班：橙红 + 加粗
+  const RANK = ex.rank;
+  const CLASS_COLOR = ex.classColorsLight;
+  const CLASS_NAME = c => c === "全年级" ? "全年级" : (ex.classNames[c] || c + "班");
+  const classes = ex.classes;
+
+  const gradeVals = classes["全年级"].subjects[SUBJ].s || [];
+  const gm = moments(gradeVals);
+  if (!gm) {
+    host.textContent = "该科目暂无分数数据";
+    warn.hidden = true;
+    return;
+  }
+
+  // 分数高度并列提示：此时任何平滑曲线都会失真的「造峰」，应以表格为准
+  const tie = modalShare(gradeVals);
+  if (tie > 0.15) {
+    const c = new Map();
+    for (const v of gradeVals) c.set(v, (c.get(v) || 0) + 1);
+    let bk = null, bv = -1;
+    for (const [k, v] of c) if (v > bv) { bv = v; bk = k; }
+    warn.replaceChildren();
+    const b = document.createElement("b");
+    b.textContent = "此科分数高度并列，平滑曲线仅供参考：";
+    warn.append(b);
+    warn.append(document.createTextNode(
+      `全年级有 ${Math.round(tie * 100)}% 的学生（${Math.max(1, Math.round(tie * gradeVals.length))} 人）同为 ${bk} 分，分数集中在一个点上。`
+      + `下方曲线的峰高是被核密度平滑「摊开」的结果，不宜按峰高判断人数多少；确切人数请看下方等级构成表。`));
+    warn.hidden = false;
+  } else {
+    warn.hidden = true;
+  }
+
+  // 横轴按重点班级的分数区间设定：全年级还含其余各班，其低分长尾会把重点班压成一小条。
+  // 全年级曲线仍在同一窗口内按全部数据算密度（窗口外的点照样贡献核），只是不显示窗口外的部分。
+  const focusVals = FOCUS.flatMap(cls => (classes[cls] || { subjects: {} }).subjects[SUBJ]?.s || []);
+  const fm = moments(focusVals) || gm;
+  const fspan = (fm.max - fm.min) || 1;
+  const binW = Math.max(0.5, niceStep(fspan / 14));
+  const x0 = Math.floor((fm.min - fspan * 0.05) / binW) * binW;
+  const x1 = Math.ceil((fm.max + fspan * 0.05) / binW) * binW;
+  const outside = gradeVals.filter(v => v < x0 || v > x1).length;
+  const NX = 240, xs = [];
+  for (let i = 0; i <= NX; i++) xs.push(x0 + (x1 - x0) * i / NX);
+
+  const groups = FOCUS.map(cls => {
+    const vals = (classes[cls] || { subjects: {} }).subjects[SUBJ]?.s || [];
+    return { cls, name: CLASS_NAME(cls), color: CLASS_COLOR[cls], vals, m: moments(vals) };
+  }).filter(g => g.m);
+  const base = { cls: "全年级", name: "全年级", color: "var(--baseline-series)", vals: gradeVals, m: gm };
+  const all = [...groups, base];
+  all.forEach(g => { g.kde = kdeCurve(g.vals, xs, binW * 0.5); });
+
+  // 分箱计数：十字准线读的是真实人数，不是模型值
+  const nb = Math.max(1, Math.round((x1 - x0) / binW));
+  const bins = Array.from({ length: nb }, (_, i) => ({
+    lo: x0 + i * binW, hi: x0 + (i + 1) * binW, counts: all.map(() => 0),
+  }));
+  all.forEach((g, gi) => {
+    for (const v of g.vals) {
+      if (v < x0 || v >= x1) continue;   // 窗口外的点不计入分箱，否则首尾箱会被撑出假峰
+      const i = Math.floor((v - x0) / binW);
+      if (i >= 0 && i < nb) bins[i].counts[gi]++;
+    }
+  });
+
+  // 等级分带：等级由排名决定，但在分数轴上每档占据一段连续区间。
+  // 区间取自全年级该科的实测分数范围；相邻两档的分界取「这一档最低分」与「下一档最高分」的中点。
+  const gradeBounds = classes["全年级"].subjects[SUBJ].b || [];
+  const bands = [];
+  LEVELS.forEach((lv, i) => {
+    const r = gradeBounds[i];
+    if (r) bands.push({ lv, i, lo: r[0], hi: r[1] });
+  });
+  // 注意方向：等级数组从好到差（分数从高到低），而分数轴从左到右是由低到高。
+  // lo/hi 是「本档最低分/最高分」，不是「左边界/右边界」。
+  // 首尾两档向外延伸到无穷：分带只覆盖实际分数范围，而横轴因留白会伸出这个范围，
+  // 若不外延，超出的分数不属于任何档，bandAt 会落到兜底档（末档），把最高分误判成末档。
+  bands.forEach((b, k) => {
+    b.left = k === bands.length - 1 ? -Infinity : (b.lo + bands[k + 1].hi) / 2;
+    b.right = k === 0 ? Infinity : (b.hi + bands[k - 1].lo) / 2;
+  });
+  const bandAt = v => bands.find(b => v >= b.left && v < b.right) || bands[bands.length - 1];
+  bands.forEach(b => {
+    b.counts = all.map(g => g.vals.filter(v => v >= b.left && v < b.right).length);
+  });
+
+  const W = host.clientWidth || 1240, H = 384;
+  const M = { t: 34, r: 18, b: 52, l: 54 };   // t 留出等级字母条
+  const iw = Math.max(80, W - M.l - M.r), ih = H - M.t - M.b;
+
+  const yMax = Math.max(...all.flatMap(g => g.kde), 1e-6) * 1.12;
+  // 横轴反向：分数自左向右递减，高分在左、低分在右
+  const x = v => M.l + (x1 - v) / (x1 - x0) * iw;
+  /** 某分数区间对应的横向像素范围；轴反向后不能想当然认为 x(小) < x(大) */
+  const spanX = (vLo, vHi) => {
+    const a = x(vLo), b2 = x(vHi);
+    return [Math.max(Math.min(a, b2), M.l), Math.min(Math.max(a, b2), M.l + iw)];
+  };
+  const y = d => M.t + ih - (d / yMax) * ih;
+
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("height", H);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `${SUBJ} 分数分布曲线，${ex.exam}，各班与全年级对比`);
+  const el = (tag, attrs) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) if (attrs[k] !== null) n.setAttribute(k, attrs[k]);
+    return n;
+  };
+
+  // 等级分带：画在最底层，交替底色区分档位，带顶标出档位字母
+  const showBoundScores = bands.length <= 10;
+  bands.forEach((b, k) => {
+    const [xa, xb] = spanX(b.left, b.right);
+    if (xb - xa < 0.6) return;                    // 太窄的带画出来只是噪点
+    if (k % 2) svg.append(el("rect", { x: xa, y: M.t, width: xb - xa, height: ih, fill: "var(--band)" }));
+    if (k > 0) svg.append(el("line", { x1: xa, x2: xa, y1: M.t, y2: M.t + ih, stroke: "var(--band-edge)", "stroke-width": 1 }));
+    if (xb - xa >= 13) {
+      const t = el("text", {
+        x: (xa + xb) / 2, y: M.t - 9, "text-anchor": "middle",
+        fill: "var(--text-muted)", "font-size": 11, "font-weight": 600,
+      });
+      t.textContent = b.lv;
+      svg.append(t);
+      // 分界分数：档位多时（如 20 档）数字会和档位字母挤成一片，此时只留字母。
+      // Number.isFinite：首尾两档的边界是 ±Infinity，不能当分数标出来
+      if (showBoundScores && k > 0 && Number.isFinite(b.left) && xb - xa >= 34) {
+        const s = el("text", {
+          x: Math.max(Math.min(x(b.left), M.l + iw), M.l), y: M.t - 1, "text-anchor": "middle",
+          fill: "var(--text-muted)", "font-size": 9.5, opacity: .85,
+        });
+        s.textContent = fmtB(b.left);
+        svg.append(s);
+      }
+    }
+  });
+
+  // 网格 + 纵轴刻度
+  const yStep = niceStep(yMax / 4);
+  const yTop = Math.ceil(yMax / yStep) * yStep;
+  const yDec = Math.max(0, -Math.floor(Math.log10(yStep)));
+  for (let d = 0; d <= yTop + 1e-12; d += yStep) {
+    const gy = y(d);
+    svg.append(el("line", { x1: M.l, x2: M.l + iw, y1: gy, y2: gy, stroke: "var(--gridline)", "stroke-width": 1 }));
+    const t = el("text", { x: M.l - 9, y: gy + 4, "text-anchor": "end", fill: "var(--text-muted)", "font-size": 11 });
+    t.textContent = d.toFixed(yDec);
+    svg.append(t);
+  }
+  // 横轴刻度
+  const xStep = niceStep((x1 - x0) / 8);
+  for (let v = Math.ceil(x0 / xStep) * xStep; v <= x1 + 1e-9; v += xStep) {
+    const t = el("text", { x: x(v), y: M.t + ih + 20, "text-anchor": "middle", fill: "var(--text-muted)", "font-size": 11 });
+    t.textContent = Number(v.toFixed(2));
+    svg.append(t);
+    svg.append(el("line", { x1: x(v), x2: x(v), y1: M.t + ih, y2: M.t + ih + 5, stroke: "var(--baseline)", "stroke-width": 1 }));
+  }
+  svg.append(el("line", { x1: M.l, x2: M.l + iw, y1: y(0), y2: y(0), stroke: "var(--baseline)", "stroke-width": 1 }));
+  const xlab = el("text", { x: M.l + iw / 2, y: H - 8, "text-anchor": "middle", fill: "var(--text-muted)", "font-size": 11.5 });
+  xlab.textContent = "分数（自左向右递减，高分在左，故首档在左侧、末档在右侧）";
+  svg.append(xlab);
+  const ylab = el("text", { x: 12, y: M.t + ih / 2, "text-anchor": "middle", fill: "var(--text-muted)", "font-size": 11.5,
+    transform: `rotate(-90 12 ${M.t + ih / 2})` });
+  ylab.textContent = "分数密度（各班按本班人数归一）";
+  svg.append(ylab);
+
+  const path = (vals) => vals.map((d, i) => `${i ? "L" : "M"}${x(xs[i])},${y(d)}`).join(" ");
+
+  // 先画全年级基准，再画各班，保证各班压在上层。
+  // 本班（FEATURED）橙红 + 更粗：曲线一多，粗线是不靠颜色也能定位的手段
+  [base, ...groups].forEach(g => {
+    const isFeat = g.cls === FEATURED;
+    svg.append(el("path", {
+      d: path(g.kde), fill: "none", stroke: g.color,
+      "stroke-width": g === base ? 1.5 : isFeat ? 3.2 : 2,
+      "stroke-dasharray": g === base ? "5 4" : null,
+      "stroke-linejoin": "round", "stroke-linecap": "round",
+      opacity: g === base ? .8 : 1,
+    }));
+  });
+
+  // 十字准线：按分箱移动，读的是真实人数
+  const cross = el("line", { x1: 0, x2: 0, y1: M.t, y2: M.t + ih, stroke: "var(--baseline)", "stroke-width": 1, opacity: 0 });
+  svg.append(cross);
+
+  bins.forEach(b => {
+    const hit = el("rect", {
+      x: Math.min(x(b.lo), x(b.hi)), y: M.t, width: Math.max(iw / nb, 18), height: ih,
+      fill: "transparent", tabindex: "0", role: "button",
+      "aria-label": `${fmtB(b.lo)} 到 ${fmtB(b.hi)} 分（${(bandAt((b.lo + b.hi) / 2) || {}).lv || "?"} 档）：`
+        + all.map((g, i) => `${g.name} ${b.counts[i]} 人`).join("，"),
+    });
+    const on = ev => {
+      const cx = x((b.lo + b.hi) / 2);
+      cross.setAttribute("x1", cx); cross.setAttribute("x2", cx); cross.setAttribute("opacity", 1);
+      const bd = bandAt((b.lo + b.hi) / 2);
+      showTip(ev, t => {
+        t.append(tipTitle(bd ? `${fmtB(b.lo)} ~ ${fmtB(b.hi)} 分 · ${bd.lv} 档`
+                             : `${fmtB(b.lo)} ~ ${fmtB(b.hi)} 分`));
+        all.forEach((g, i) => {
+          t.append(tipRow(g.name, `${b.counts[i]} 人`, g.color, false,
+                          bd ? `/ 本档 ${bd.counts[i]} 人` : null));
+        });
+        // 用本档实测的分数范围，不用 left/right——首尾两档的边界是 ±Infinity
+        const rr = bd && RANK[bd.lv];
+        t.append(tipNote(bd
+          ? `${bd.lv} 档 = 年级第 ${rr ? rr[0] + "~" + rr[1] : "?"} 名，该档实测分数 ${fmtB(bd.lo)}~${fmtB(bd.hi)} 分`
+          : "该科目未取得等级分界数据"));
+      });
+    };
+    const off = () => { cross.setAttribute("opacity", 0); hideTip(); };
+    hit.addEventListener("pointerenter", on);
+    hit.addEventListener("pointermove", moveTip);
+    hit.addEventListener("pointerleave", off);
+    hit.addEventListener("focus", () => {
+      const r = hit.getBoundingClientRect();
+      on({ clientX: r.left + r.width / 2, clientY: r.bottom });
+    });
+    hit.addEventListener("blur", off);
+    svg.append(hit);
+  });
+
+  host.append(svg);
+
+  // 图例：把曲线所依据的 μ / σ 直接写出来
+  const lg = document.getElementById(ids.legend);
+  lg.replaceChildren();
+  [{ g: base, suffix: "（基准）" },
+   ...groups.map(g => ({ g, suffix: g.cls === FEATURED ? "（本班，线更粗）" : "" }))].forEach(({ g, suffix }) => {
+    const item = document.createElement("span");
+    item.className = "item";
+    const k = document.createElement("i");
+    k.className = "key";
+    k.style.background = g.color;
+    const t = document.createElement("span");
+    t.textContent = `${g.name}${suffix}  n=${g.m.n}  μ=${g.m.mean.toFixed(1)}  σ=${g.m.sd.toFixed(1)}`;
+    t.style.fontVariantNumeric = "tabular-nums";
+    item.append(k, t);
+    lg.append(item);
+  });
+
+  // 读图说明：重点讲「这是什么统计」和「图传达了什么的印象」，
+  // 不铺陈横轴范围、分箱宽、落在窗外的具体人数之类的细节（用户明确要求别啰嗦）。
+  // 唯一必须保留的技术提示是「哪些档位整档在图外」——不说明会被读成图上缺档。
+  const note = document.getElementById(ids.note);
+  note.replaceChildren();
+  const para = (txt, cls) => {
+    const d = document.createElement("p");
+    if (cls) d.className = cls;
+    d.textContent = txt;
+    note.append(d);
+  };
+  para("曲线是核密度估计：把每个学生的原始分数当作一个数据点做平滑，不假设成绩服从正态分布、"
+     + "也不预设分数线——峰在哪儿、有多胖，都是数据本身的样子。均分相同的两个班，"
+     + "形态可以完全不同，这正是均分与排名看不出来的那一层。");
+  para("看三件事：峰的位置（越靠左＝高分侧，说明主体水平越高）、峰的胖瘦"
+     + "（越高越窄＝成绩越集中、区分度越低；越矮越宽＝拉得越开）、两侧的尾巴"
+     + "（哪边拖得长，哪边的人就多）。灰色虚线是全年级基准，用来判断本班在年级中的相对位置。");
+  // 与画带时同一判据（钳位后宽度 < 0.6px 即整条不画），保证「说了没画」与「画了没说」不会对不上
+  const offChart = bands.filter(b => {
+    const [xa, xb] = spanX(b.left, b.right);
+    return xb - xa < 0.6;
+  });
+  const caveats = [];
+  if (outside) caveats.push("横轴只画重点班级的分数区间，全年级还有少数更低分的学生在图外");
+  if (offChart.length) caveats.push(`${offChart.map(b => b.lv).join("、")} 档整体低于横轴下限，图上不显示`);
+  if (caveats.length) para(caveats.join("；") + "。各档确切人数见下方等级构成表。", "caveat");
+}
+
+/* ==================== 等级构成表 ==================== */
+/* 两个分块：该科 与 总分。行 = 班级，列 = 档位（A 在前），格 = 人数。
+   颜色用该档的等级色阶，与主报告热力图同一套语言；悬停给出占比与该档的年级排名区间。
+   总分那一块用来判断「这科掉队是不是整体掉队的缩影」——
+   该科靠后但总分不靠后，才是真的偏科。 */
+function renderCompTable(hostId, noteId, ex, className) {
+  const host = document.getElementById(hostId);
+  const note = document.getElementById(noteId);
+  host.replaceChildren();
+
+  const LEVELS = ex.levels, FOCUS = ex.focus, RANK = ex.rank, FEATURED = ex.featured;
+  const ramp = ex.rampLight;
+  const cols = [...FOCUS, "全年级"];
+  const bandOf = i => (ex.bands.find(b => i >= b.from && i < b.to) || {}).key || "";
+  // 该科在前、总分在后；没有总分列的表（理论上不会有）就只画该科
+  const blocks = [{ key: SUBJ, label: SUBJ }];
+  if (ex.hasTotal && ex.classes["全年级"].subjects["总分"]) {
+    blocks.push({ key: "总分", label: "总分" });
+  }
+
+  const table = document.createElement("table");
+  table.className = "comp";
+
+  const thead = document.createElement("thead");
+  // 第一行：档位分组（优秀/良好/…）跨列；前面两列是「科目 / 班级」
+  const trG = document.createElement("tr");
+  trG.append(document.createElement("th"), document.createElement("th"));
+  let i = 0;
+  while (i < LEVELS.length) {
+    const key = bandOf(i);
+    let j = i;
+    while (j < LEVELS.length && bandOf(j) === key) j++;
+    const th = document.createElement("th");
+    th.className = "grp";
+    th.colSpan = j - i;
+    th.textContent = key;
+    trG.append(th);
+    i = j;
+  }
+  thead.append(trG);
+  // 第二行：档位字母
+  const trL = document.createElement("tr");
+  const thS = document.createElement("th");
+  thS.className = "rowh";
+  thS.textContent = "科目";
+  const thC = document.createElement("th");
+  thC.className = "rowh";
+  thC.textContent = "班级";
+  trL.append(thS, thC);
+  LEVELS.forEach(lv => {
+    const th = document.createElement("th");
+    th.textContent = lv;
+    trL.append(th);
+  });
+  thead.append(trL);
+  table.append(thead);
+
+  const tbody = document.createElement("tbody");
+  blocks.forEach(blk => {
+    cols.forEach((c, ci) => {
+      const tr = document.createElement("tr");
+      if (ci === 0) {
+        // 科目列跨整块，避免每行重复写一遍科目名
+        const thB = document.createElement("th");
+        thB.className = "rowh block";
+        thB.rowSpan = cols.length;
+        thB.textContent = blk.label;
+        tr.append(thB);
+      }
+      const th = document.createElement("th");
+      th.className = "rowh";
+      const sw = document.createElement("span");
+      sw.className = "swatch-cell";
+      if (c !== "全年级") {
+        const dot = document.createElement("i");
+        dot.style.background = ex.classColorsLight[c];
+        sw.append(dot);
+      }
+      sw.append(document.createTextNode(
+        (c === "全年级" ? "全年级" : (ex.classNames[c] || c + "班")) + (c === FEATURED ? "（本班）" : "")));
+      th.append(sw);
+      tr.append(th);
+
+      const tk = ex.classes[c].subjects[blk.key];
+      const n = tk.n || 1;
+      LEVELS.forEach((lv, i) => {
+        const v = tk.c[i] || 0;
+        const td = document.createElement("td");
+        td.textContent = v || "";
+        if (!v) {
+          td.className = "zero";
+        } else {
+          td.style.background = ramp[i];
+          td.style.color = inkOn(ramp[i]);
+          td.style.fontWeight = 600;
+        }
+        td.tabIndex = 0;
+        const tipFor = ev => showTip(ev, t => {
+          const rr = RANK[lv];
+          t.append(tipTitle(`${ex.classNames[c] || c + "班"} · ${blk.label} · ${lv} 档`));
+          t.append(tipRow("人数", `${v} 人`, null, false, `/ 该班 ${tk.n} 人`));
+          t.append(tipRow("占本班" + blk.label, `${(v / n * 100).toFixed(1)}%`, null, false));
+          t.append(tipNote(rr ? `${lv} 档 = 年级第 ${rr[0]}~${rr[1]} 名` : "该档未取得年级排名区间"));
+        });
+        td.addEventListener("pointerenter", tipFor);
+        td.addEventListener("pointermove", moveTip);
+        td.addEventListener("pointerleave", hideTip);
+        td.addEventListener("focus", () => {
+          const r = td.getBoundingClientRect();
+          tipFor({ clientX: r.left + r.width / 2, clientY: r.bottom });
+        });
+        td.addEventListener("blur", hideTip);
+        tr.append(td);
+      });
+      tbody.append(tr);
+    });
+  });
+  table.append(tbody);
+  host.append(table);
+
+  const tk = ex.classes[className]?.subjects[SUBJ];
+  note.textContent = `共 ${LEVELS.length} 档（${LEVELS[0]} ~ ${LEVELS[LEVELS.length - 1]}）`
+    + `；上块为${SUBJ}，下块为总分`
+    + (tk ? `。本班 ${className} 该科 ${tk.n} 人有等级，均分 ${tk.mean} 分` : "");
+}
+
+/* ==================== 本次考试情况总结 ==================== */
+/* 文字由生成脚本按分布曲线算出并注入（见 生成科任老师文档.py 的 exam_summary），
+   页面只负责显示——口径与判据都在脚本里，改口径不用动模板。 */
+function renderSummary() {
+  const card = document.getElementById("curr-summary");
+  const txt = DATA.summary || "";
+  if (!txt) {
+    card.hidden = true;
+    return;
+  }
+  card.hidden = false;
+  card.replaceChildren();
+  const h = document.createElement("h3");
+  h.textContent = `本次考试情况总结（${DATA.currExam} · ${SUBJ}）`;
+  const p = document.createElement("p");
+  p.textContent = txt;
+  card.append(h, p);
+}
+
+/* ==================== 目标生 ==================== */
+/* 两个分组用底色区分：年级总排名前 eliteN 的（越拔尖越值得优先补短板的那批）
+   浅底标注，其余白底。默认按总排名从高到低（名次数字小→大）排列，点列头可按任意列重排。 */
+function renderTargets() {
+  const card = document.getElementById("tgt-card");
+  const rule = DATA.rule;
+  const eliteN = rule.eliteN || 10;
+  const list = DATA.targets;
+
+  document.getElementById("tgt-desc").textContent =
+    `口径：年级总排名前 ${rule.topN}，且该科排名 > 总排名 × ${rule.ratio}`;
+
+  if (!list.length) {
+    const d = document.createElement("div");
+    d.className = "empty";
+    d.textContent = `本班（${DATA.className}）没有符合条件的目标生：`
+      + `在年级总排名前 ${rule.topN} 的学生中，该科排名均未落后于总排名 ${rule.ratio} 倍以上。`;
+    card.replaceChildren(d);
+    return;
+  }
+
+  const nElite = list.filter(s => s.totalRank <= eliteN).length;
+  const legend = document.createElement("p");
+  legend.className = "elite-legend";
+  const chip = document.createElement("i");
+  legend.append(chip, document.createTextNode(
+    `浅底行：年级总排名前 ${eliteN}，共 ${nElite} 人——这批学生整体非常拔尖，该科是他们的相对短板，`
+    + `补上见效最快。点列头可改排序，再点一次反向。`));
+
+  const COLS = [
+    { k: "name", t: "姓名", cls: "rowh" },
+    { k: "sid", t: "学号" },
+    { k: "totalRank", t: "总排名", num: 1 },
+    { k: "subjRank", t: "该科排名", num: 1 },
+    { k: "gap", t: "落后名次", num: 1, cls: "big" },
+    { k: "ratio", t: "落后倍数", num: 1 },
+    { k: "score", t: "该科分数", num: 1 },
+    { k: "band", t: "等第" },
+  ];
+  let sortKey = "totalRank", asc = true;      // 默认：总排名由前到后
+
+  const table = document.createElement("table");
+  table.className = "data";
+  const thead = document.createElement("thead");
+  const htr = document.createElement("tr");
+  const arrows = {};
+  COLS.forEach(c => {
+    const th = document.createElement("th");
+    if (c.cls === "rowh") th.className = "rowh";
+    th.tabIndex = 0;
+    th.setAttribute("role", "button");
+    const lbl = document.createElement("span");
+    lbl.textContent = c.t;
+    const ar = document.createElement("span");
+    ar.className = "arrow";
+    arrows[c.k] = ar;
+    th.append(lbl, ar);
+    const use = () => {
+      if (sortKey === c.k) asc = !asc;
+      else { sortKey = c.k; asc = true; }
+      paint();
+    };
+    th.addEventListener("click", use);
+    th.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); use(); }
+    });
+    htr.append(th);
+  });
+  thead.append(htr);
+  table.append(thead);
+  const tbody = document.createElement("tbody");
+  table.append(tbody);
+
+  function paint() {
+    const rows = list.slice().sort((a, b) => {
+      const x = a[sortKey], y = b[sortKey];
+      let c;
+      if (typeof x === "number" && typeof y === "number") c = x - y;
+      else c = String(x ?? "").localeCompare(String(y ?? ""), "zh");
+      if (c === 0) c = a.totalRank - b.totalRank;     // 并列时仍按总排名
+      return asc ? c : -c;
+    });
+    tbody.replaceChildren();
+    rows.forEach(s => {
+      const tr = document.createElement("tr");
+      if (s.totalRank <= eliteN) tr.className = "elite";
+      COLS.forEach(c => {
+        const td = document.createElement("td");
+        if (c.cls) td.className = c.cls;
+        const v = s[c.k];
+        td.textContent = v == null ? "—"
+          : c.k === "ratio" ? Number(v).toFixed(1) + "×"
+          : c.k === "score" ? Number(v) : v;
+        tr.append(td);
+      });
+      tbody.append(tr);
+    });
+    COLS.forEach(c => {
+      arrows[c.k].textContent = c.k === sortKey ? (asc ? " ▲" : " ▼") : "";
+    });
+  }
+
+  paint();
+  card.replaceChildren(legend, table);
+}
+
+/* ==================== 页面装配 ==================== */
+function headTexts() {
+  document.getElementById("head-tag").textContent = `${DATA.className} · ${SUBJ}`;
+  document.getElementById("head-title").textContent = "科任老师分析";
+  document.getElementById("head-sub").textContent =
+    `上次大考：${DATA.prevExam}　|　本次大考：${DATA.currExam}　|　对比科目：${SUBJ}`;
+  document.getElementById("head-src").textContent =
+    "数据来源：成绩分析工作区的分班数据（按班级拆分的原始成绩表）；"
+    + "两节的图表各自使用本场考试的等级体系。";
+
+  const p = DATA.prev, c = DATA.curr;
+  document.getElementById("prev-h").textContent = `上次大考 · ${p.exam} · ${SUBJ}`;
+  document.getElementById("curr-h").textContent = `本次大考 · ${c.exam} · ${SUBJ}`;
+
+  const m = document.getElementById("method");
+  const b = t => { const e = document.createElement("b"); e.textContent = t; return e; };
+  const tn = s => document.createTextNode(s);
+  m.append(b("本页怎么读"), tn("　三节依次为「本次大考」「本班目标生」「上次大考」；"
+    + "两次大考的图表分章节布置，各自使用本场考试的等级体系："));
+  const ul = document.createElement("ul");
+  const li = nodes => { const e = document.createElement("li"); e.append(...nodes); ul.append(e); };
+  li([tn("第一节「"), b(c.exam), tn(`」为 ${c.levels.length} 档：${c.levels.join(" ")}；`),
+      tn("第三节「"), b(p.exam), tn(`」为 ${p.levels.length} 档：${p.levels.join(" ")}。`)]);
+  li([b("两节的档位定义不同，不可直接跨节比较同一档位"), tn("；要比就比同一节内各班之间，或看分数轴上的实际位置。")]);
+  li([tn("曲线上"), b("橙红色加粗"), tn("的那条是"), b(DATA.className),
+      tn("（本班）。等级构成表分两块：上块该科、下块总分——该科靠后而总分不靠后，才是真的偏科。")]);
+  li([tn("等级由"), b("年级排名"), tn("决定，与分数无关；分带标出的分数区间是该档学生的实测分数范围。")]);
+  li([tn("目标生 = 年级总排名前 "), b(String(DATA.rule.topN)),
+      tn(`，且该科排名落后于总排名 ${DATA.rule.ratio} 倍以上，见第二节。`)]);
+  m.append(ul);
+
+  document.getElementById("foot-rule").textContent =
+    `目标生口径：年级总排名（${DATA.currExam}，${DATA.rule.gradeN} 人基数）前 ${DATA.rule.topN}，`
+    + `且该科排名 > 总排名 × ${DATA.rule.ratio}，按落后名次降序排列。`;
+  document.getElementById("foot-meta").textContent =
+    `本页由「生成科任老师文档.py」从成绩分析工作区的分班数据生成；`
+    + `科目：${SUBJ}；班级：${DATA.className}；考试：${DATA.prevExam} → ${DATA.currExam}。`;
+}
+
+function renderAll() {
+  drawDistribution({ host: "curr-host", legend: "curr-legend", note: "curr-note", warn: "curr-warn" }, DATA.curr);
+  drawDistribution({ host: "prev-host", legend: "prev-legend", note: "prev-note", warn: "prev-warn" }, DATA.prev);
+  renderCompTable("curr-comp", "curr-comp-note", DATA.curr, DATA.classId);
+  renderCompTable("prev-comp", "prev-comp-note", DATA.prev, DATA.classId);
+  renderSummary();
+  renderTargets();
+}
+
+headTexts();
+renderAll();
+
+// 窗口尺寸变化时重画（曲线按 host 的实际宽度定横轴范围）
+let rt = null;
+window.addEventListener("resize", () => {
+  clearTimeout(rt);
+  rt = setTimeout(renderAll, 150);
+});
+</script>
+</body>
+</html>
